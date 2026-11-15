@@ -1,9 +1,9 @@
 <?php
 
-use App\\Http\\Controllers\\Admin\\AdminAuthController;
-use App\\Http\\Controllers\\Admin\\DashboardController;
-use App\\Http\\Controllers\\Admin\\ProductController;
-use Illuminate\\Support\\Facades\\Route;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController;
+use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'pages.home')->name('home');
 Route::view('/categories', 'pages.categories')->name('categories');
