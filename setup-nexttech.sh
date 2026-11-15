@@ -39,7 +39,7 @@ cat > "$APP/resources/views/welcome.blade.php" <<'BLADE'
         .eyebrow { color: #d7bd8b; font-size: 10px; font-weight: 700; letter-spacing: 2.5px; }
         .hero h1 { font-family: Georgia, serif; font-size: clamp(29px, 6vw, 44px); line-height: 1.12; font-weight: 500; }
         .hero p { color: #e2e7ed; font-size: 14px; line-height: 1.6; }
-        .search { margin: 21px 0 25px; padding: 14px 16px; border: 1px solid #e7e8eb; border-radius: 12px; background: #fff; color: #8b96a5; }
+        .search { width: 100%; margin: 21px 0 25px; padding: 14px 16px; border: 1px solid #e7e8eb; border-radius: 12px; background: #fff; color: #172033; font-size: 15px; outline: none; }\n        .search:focus { border-color: #b58b45; box-shadow: 0 0 0 3px rgba(181,139,69,.12); }\n        .category { cursor: pointer; transition: .2s ease; }\n        .category.active { background: #172033; border-color: #172033; color: #fff; }\n        .product[hidden] { display: none; }\n        .empty-state { display: none; padding: 24px; text-align: center; color: #7b8492; background: #fff; border: 1px dashed #d8dce2; border-radius: 12px; grid-column: 1 / -1; }\n        .empty-state.show { display: block; }
         .section-title { font-family: Georgia, serif; font-size: 21px; font-weight: 600; margin: 24px 0 14px; }
         .categories { display: flex; flex-wrap: wrap; gap: 9px; }
         .category { padding: 10px 15px; border: 1px solid #e6e1d7; border-radius: 22px; background: #fff; font-size: 13px; }
@@ -91,7 +91,7 @@ cat > "$APP/resources/views/welcome.blade.php" <<'BLADE'
         <h1>The Future, Solved.</h1>
         <p>Discover technology that makes life smarter.</p>
     </section>
-    <div class="search">⌕ &nbsp; Search products...</div>
+    <input class="search" id="product-search" type="search" placeholder="⌕  Search products..." aria-label="Search products">
     <h2 class="section-title" id="categories">Explore Categories</h2>
     <div class="categories">
         <span class="category">Smartphones</span><span class="category">Laptops</span>
@@ -146,6 +146,29 @@ cat > "$APP/resources/views/welcome.blade.php" <<'BLADE'
     overlay.addEventListener('click', event => {
         if (event.target === overlay) overlay.classList.remove('open');
     });
+    const searchInput = document.getElementById('product-search');
+    const productCards = [...document.querySelectorAll('.product')];
+    const categoryButtons = [...document.querySelectorAll('[data-category]')];
+    let selectedCategory = 'all';
+    function filterProducts() {
+        const term = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+        productCards.forEach(card => {
+            const matchesCategory = selectedCategory === 'all' || card.dataset.category === selectedCategory;
+            const matchesSearch = card.textContent.toLowerCase().includes(term);
+            const show = matchesCategory && matchesSearch;
+            card.hidden = !show;
+            if (show) visible++;
+        });
+        document.getElementById('empty-state').classList.toggle('show', visible === 0);
+    }
+    searchInput.addEventListener('input', filterProducts);
+    categoryButtons.forEach(button => button.addEventListener('click', () => {
+        selectedCategory = button.dataset.category;
+        categoryButtons.forEach(item => item.classList.toggle('active', item === button));
+        filterProducts();
+        document.getElementById('featured').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
     document.querySelectorAll('[data-action]').forEach(button => {
         button.addEventListener('click', () => {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
