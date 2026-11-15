@@ -1,188 +1,81 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 APP="$ROOT/laravel-app"
-
 if [ ! -f "$APP/artisan" ]; then
-  echo "Laravel app not found at: $APP"
+  echo "Laravel app not found: $APP"
   exit 1
 fi
-
 mkdir -p "$APP/resources/views"
-
 cat > "$APP/resources/views/welcome.blade.php" <<'BLADE'
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#101b2d">
-    <title>Next Tech | The Future, Solved.</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body { font-family: Arial, sans-serif; background: #f6f7f9; color: #172033; padding-bottom: 82px; }
-        a, button { color: inherit; font: inherit; }
-        a { text-decoration: none; }
-        button { cursor: pointer; }
-        .site-header { height: 76px; background: #fff; border-bottom: 1px solid #e9e5dc; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; position: sticky; top: 0; z-index: 10; }
-        .icon-link { width: 40px; height: 42px; display: grid; place-items: center; border: 0; background: transparent; }
-        .icon { width: 25px; height: 25px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-        .brand { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; line-height: 1; white-space: nowrap; }
-        .brand-main { color: #172033; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; font-weight: 700; letter-spacing: 3px; }
-        .brand-main span { color: #b58b45; }
-        .brand-tag { margin-top: 5px; color: #8a7657; font-size: 8px; letter-spacing: 2.2px; text-transform: uppercase; }
-        .wishlist { margin-left: auto; color: #172033; position: relative; }
-        main { width: min(1100px, 100%); margin: auto; padding: 22px 17px; }
-        .hero { min-height: 225px; padding: 34px 24px; border-radius: 18px; color: #fff; background: linear-gradient(130deg, #101b2d, #203e60); display: flex; flex-direction: column; justify-content: center; gap: 12px; }
-        .eyebrow { color: #d7bd8b; font-size: 10px; font-weight: 700; letter-spacing: 2.5px; }
-        .hero h1 { font-family: Georgia, serif; font-size: clamp(29px, 6vw, 44px); line-height: 1.12; font-weight: 500; }
-        .hero p { color: #e2e7ed; font-size: 14px; line-height: 1.6; }
-        .search { width: 100%; margin: 21px 0 25px; padding: 14px 16px; border: 1px solid #e7e8eb; border-radius: 12px; background: #fff; color: #172033; font-size: 15px; outline: none; }\n        .search:focus { border-color: #b58b45; box-shadow: 0 0 0 3px rgba(181,139,69,.12); }\n        .category { cursor: pointer; transition: .2s ease; }\n        .category.active { background: #172033; border-color: #172033; color: #fff; }\n        .product[hidden] { display: none; }\n        .empty-state { display: none; padding: 24px; text-align: center; color: #7b8492; background: #fff; border: 1px dashed #d8dce2; border-radius: 12px; grid-column: 1 / -1; }\n        .empty-state.show { display: block; }
-        .section-title { font-family: Georgia, serif; font-size: 21px; font-weight: 600; margin: 24px 0 14px; }
-        .categories { display: flex; flex-wrap: wrap; gap: 9px; }
-        .category { padding: 10px 15px; border: 1px solid #e6e1d7; border-radius: 22px; background: #fff; font-size: 13px; }
-        .products { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-        .product { padding: 12px; background: #fff; border: 1px solid #e9e7e2; border-radius: 13px; }
-        .product-image { height: 115px; margin-bottom: 11px; border-radius: 9px; background: #f0f2f5; display: grid; place-items: center; font-size: 36px; }
-        .product h3 { font-size: 14px; margin-bottom: 7px; }
-        .product p { color: #a17b3e; font-size: 13px; font-weight: 700; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 72px; padding-bottom: env(safe-area-inset-bottom); background: #fff; border-top: 1px solid #e8e5df; display: flex; justify-content: space-around; align-items: center; z-index: 20; }
-        .nav-item { min-width: 62px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #89909a; font-size: 11px; }
-        .nav-item.active { color: #a17b3e; }
-        .nav-item .icon { width: 23px; height: 23px; }
-        .nav-item.active .icon { stroke-width: 2.2; }
-        .overlay { position: fixed; inset: 0; background: rgba(12, 20, 32, .48); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
-        .overlay.open { display: flex; }
-        .sheet { width: min(100%, 520px); background: #fff; border-radius: 20px 20px 0 0; padding: 22px 20px calc(24px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,.15); }
-        .sheet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .sheet h2 { font-family: Georgia, serif; font-size: 22px; }
-        .close-sheet { border: 0; background: #f1f2f4; width: 34px; height: 34px; border-radius: 50%; font-size: 20px; }
-        .sheet p { color: #697386; line-height: 1.6; font-size: 14px; }
-        .sheet-action { display: inline-block; margin-top: 16px; padding: 11px 17px; background: #172033; color: #fff; border: 0; border-radius: 9px; }
-        @media (min-width: 700px) {
-            body { padding-bottom: 0; }
-            .products { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-            .hero { padding: 50px; }
-            .bottom-nav { position: static; border-top: 1px solid #e8e5df; }
-            .overlay { align-items: center; }
-            .sheet { border-radius: 18px; }
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101b2d">
+<title>Next Tech | The Future, Solved.</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:Arial,sans-serif;background:#f6f7f9;color:#172033;padding-bottom:82px}button,input{font:inherit}button{cursor:pointer}.site-header{height:76px;background:#fff;border-bottom:1px solid #e9e5dc;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:10}.icon-link{width:40px;height:42px;display:grid;place-items:center;border:0;background:transparent}.icon{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.brand{position:absolute;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;line-height:1;text-decoration:none;white-space:nowrap}.brand-main{color:#172033;font-family:Georgia,serif;font-size:25px;font-weight:700;letter-spacing:3px}.brand-main span{color:#b58b45}.brand-tag{margin-top:5px;color:#8a7657;font-size:8px;letter-spacing:2.2px}.wishlist{margin-left:auto;position:relative}.count{position:absolute;top:0;right:0;background:#b58b45;color:white;border-radius:20px;font-size:10px;min-width:16px;padding:2px 4px;text-align:center}
+main{width:min(1100px,100%);margin:auto;padding:22px 17px}.hero{min-height:225px;padding:34px 24px;border-radius:18px;color:white;background:linear-gradient(130deg,#101b2d,#203e60);display:flex;flex-direction:column;justify-content:center;gap:12px}.eyebrow{color:#d7bd8b;font-size:10px;font-weight:700;letter-spacing:2.5px}.hero h1{font-family:Georgia,serif;font-size:clamp(29px,6vw,44px);font-weight:500}.hero p{color:#e2e7ed;font-size:14px;line-height:1.6}.search{width:100%;margin:21px 0 25px;padding:14px 16px;border:1px solid #e7e8eb;border-radius:12px;background:#fff;color:#172033;font-size:15px;outline:none}.search:focus{border-color:#b58b45}.section-title{font-family:Georgia,serif;font-size:21px;margin:24px 0 14px}.categories{display:flex;flex-wrap:wrap;gap:9px}.category{padding:10px 15px;border:1px solid #e6e1d7;border-radius:22px;background:#fff;font-size:13px}.category.active{background:#172033;color:#fff;border-color:#172033}.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product{position:relative;padding:11px;background:#fff;border:1px solid #e9e7e2;border-radius:13px}.product[hidden]{display:none}.product-image{height:125px;margin-bottom:11px;border-radius:9px;background:#f0f2f5;display:grid;place-items:center;font-size:48px}.product h3{font-size:14px;margin-bottom:7px}.price{color:#a17b3e;font-size:14px;font-weight:700}.product-actions{display:flex;gap:7px;margin-top:12px}.small-btn{flex:1;padding:9px 6px;border:1px solid #e3e5e8;border-radius:8px;background:#fff;font-size:11px}.small-btn.primary{background:#172033;color:white;border-color:#172033}.heart-btn{position:absolute;right:17px;top:17px;border:0;border-radius:50%;width:32px;height:32px;background:white;font-size:18px;color:#7b8492}.heart-btn.saved{color:#bd5360}.empty-state{display:none;padding:24px;text-align:center;color:#7b8492;background:white;border:1px dashed #d8dce2;border-radius:12px;grid-column:1/-1}.empty-state.show{display:block}
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;height:72px;padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid #e8e5df;display:flex;justify-content:space-around;align-items:center;z-index:20}.nav-item{min-width:62px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;color:#89909a;font-size:11px}.nav-item.active{color:#a17b3e}.nav-item .icon{width:23px;height:23px}.overlay{position:fixed;inset:0;background:rgba(12,20,32,.5);display:none;align-items:flex-end;justify-content:center;z-index:50}.overlay.open{display:flex}.sheet{width:min(100%,540px);max-height:82vh;overflow:auto;background:white;border-radius:20px 20px 0 0;padding:22px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px #0002}.sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.sheet h2{font-family:Georgia,serif;font-size:22px}.close-sheet{border:0;background:#f1f2f4;width:34px;height:34px;border-radius:50%;font-size:20px}.sheet p{color:#697386;line-height:1.6;font-size:14px}.sheet-action{margin-top:16px;padding:11px 17px;background:#172033;color:white;border:0;border-radius:9px}.cart-row,.wish-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.mini-image{width:52px;height:52px;display:grid;place-items:center;background:#f0f2f5;border-radius:9px;font-size:25px}.row-info{flex:1}.row-info strong{display:block;font-size:13px}.row-info small{color:#a17b3e}.qty{display:flex;align-items:center;gap:8px}.qty button{width:25px;height:25px;border:1px solid #ddd;background:#fff;border-radius:6px}.total{display:flex;justify-content:space-between;font-weight:bold;margin-top:18px}.detail-visual{height:170px;background:#f0f2f5;border-radius:13px;display:grid;place-items:center;font-size:70px;margin-bottom:15px}.detail-price{color:#a17b3e;font-weight:bold;margin:10px 0}.detail-copy{margin:10px 0 15px}@media(min-width:700px){body{padding-bottom:0}.products{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:50px}.bottom-nav{position:static}.overlay{align-items:center}.sheet{border-radius:18px}}
+</style>
 </head>
 <body>
 <header class="site-header">
-    <button class="icon-link" type="button" data-panel="menu" aria-label="Open menu">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
-    <a class="brand" href="/" aria-label="Next Tech home">
-        <span class="brand-main">NEXT <span>TECH</span></span>
-        <span class="brand-tag">The Future, Solved.</span>
-    </a>
-    <button class="icon-link wishlist" type="button" data-panel="wishlist" aria-label="Open wishlist">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>
-    </button>
+<button class="icon-link" id="menu-open" aria-label="Open menu"><svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<a class="brand" href="/" aria-label="Next Tech home"><span class="brand-main">NEXT <span>TECH</span></span><span class="brand-tag">THE FUTURE, SOLVED.</span></a>
+<button class="icon-link wishlist" id="wishlist-open" aria-label="Open wishlist"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg><span class="count" id="wish-count">0</span></button>
 </header>
-
 <main id="home">
-    <section class="hero">
-        <span class="eyebrow">WELCOME TO NEXT TECH</span>
-        <h1>The Future, Solved.</h1>
-        <p>Discover technology that makes life smarter.</p>
-    </section>
-    <input class="search" id="product-search" type="search" placeholder="⌕  Search products..." aria-label="Search products">
-    <h2 class="section-title" id="categories">Explore Categories</h2>
-    <div class="categories">
-        <span class="category">Smartphones</span><span class="category">Laptops</span>
-        <span class="category">Accessories</span><span class="category">Gadgets</span>
-    </div>
-    <h2 class="section-title" id="featured">Featured Products</h2>
-    <section class="products">
-        <article class="product"><div class="product-image">📱</div><h3>Smartphone</h3><p>Coming soon</p></article>
-        <article class="product"><div class="product-image">💻</div><h3>Laptop</h3><p>Coming soon</p></article>
-        <article class="product"><div class="product-image">🎧</div><h3>Headphones</h3><p>Coming soon</p></article>
-        <article class="product"><div class="product-image">⌚</div><h3>Smart Watch</h3><p>Coming soon</p></article>
-    </section>
-</main>
-
-<nav class="bottom-nav" aria-label="Main navigation">
-    <button class="nav-item active" type="button" data-action="home"><svg class="icon" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
-    <button class="nav-item" type="button" data-action="categories"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Categories</span></button>
-    <button class="nav-item" type="button" data-action="cart"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span>Cart</span></button>
-    <button class="nav-item" type="button" data-action="profile"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Profile</span></button>
-</nav>
-
-<div class="overlay" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
-    <section class="sheet">
-        <div class="sheet-top"><h2 id="panel-title">Next Tech</h2><button class="close-sheet" type="button" aria-label="Close">×</button></div>
-        <p id="panel-message">Welcome to Next Tech.</p>
-        <button class="sheet-action" type="button" id="panel-action">Continue browsing</button>
-    </section>
+<section class="hero"><span class="eyebrow">WELCOME TO NEXT TECH</span><h1>The Future, Solved.</h1><p>Discover technology that makes life smarter.</p></section>
+<input class="search" id="product-search" type="search" placeholder="⌕  Search products..." aria-label="Search products">
+<h2 class="section-title" id="categories">Explore Categories</h2>
+<div class="categories">
+<button class="category active" data-category="all">All</button><button class="category" data-category="phones">Smartphones</button><button class="category" data-category="computers">Laptops</button><button class="category" data-category="audio">Accessories</button><button class="category" data-category="gadgets">Gadgets</button>
 </div>
-
+<h2 class="section-title" id="featured">Featured Products</h2>
+<section class="products" id="products">
+<article class="product" data-id="phone-x" data-category="phones" data-name="Nova X Smartphone" data-price="45990" data-emoji="📱"><button class="heart-btn" aria-label="Add to wishlist">♡</button><div class="product-image">📱</div><h3>Nova X Smartphone</h3><p class="price">৳45,990</p><div class="product-actions"><button class="small-btn details-btn">Details</button><button class="small-btn primary add-btn">Add to Cart</button></div></article>
+<article class="product" data-id="laptop-pro" data-category="computers" data-name="AeroBook Pro" data-price="82900" data-emoji="💻"><button class="heart-btn" aria-label="Add to wishlist">♡</button><div class="product-image">💻</div><h3>AeroBook Pro</h3><p class="price">৳82,900</p><div class="product-actions"><button class="small-btn details-btn">Details</button><button class="small-btn primary add-btn">Add to Cart</button></div></article>
+<article class="product" data-id="sound-buds" data-category="audio" data-name="SoundBuds Air" data-price="3490" data-emoji="🎧"><button class="heart-btn" aria-label="Add to wishlist">♡</button><div class="product-image">🎧</div><h3>SoundBuds Air</h3><p class="price">৳3,490</p><div class="product-actions"><button class="small-btn details-btn">Details</button><button class="small-btn primary add-btn">Add to Cart</button></div></article>
+<article class="product" data-id="smart-watch" data-category="gadgets" data-name="Pulse Smart Watch" data-price="5990" data-emoji="⌚"><button class="heart-btn" aria-label="Add to wishlist">♡</button><div class="product-image">⌚</div><h3>Pulse Smart Watch</h3><p class="price">৳5,990</p><div class="product-actions"><button class="small-btn details-btn">Details</button><button class="small-btn primary add-btn">Add to Cart</button></div></article>
+<p class="empty-state" id="empty-state">No matching products found.</p>
+</section>
+</main>
+<nav class="bottom-nav" aria-label="Main navigation">
+<button class="nav-item active" data-action="home"><svg class="icon" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+<button class="nav-item" data-action="categories"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Categories</span></button>
+<button class="nav-item" data-action="cart"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span>Cart <small id="cart-count"></small></span></button>
+<button class="nav-item" data-action="profile"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Profile</span></button>
+</nav>
+<div class="overlay" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title"><section class="sheet"><div class="sheet-top"><h2 id="panel-title">Next Tech</h2><button class="close-sheet" aria-label="Close">×</button></div><div id="panel-content"></div><button class="sheet-action" id="panel-action">Continue browsing</button></section></div>
 <script>
-    const overlay = document.getElementById('panel');
-    const panelTitle = document.getElementById('panel-title');
-    const panelMessage = document.getElementById('panel-message');
-    const panelAction = document.getElementById('panel-action');
-    const panelCopy = {
-        menu: ['Quick Menu', 'Explore our product categories and featured technology.'],
-        wishlist: ['Your Wishlist', 'Your saved products will appear here once wishlist features are connected.'],
-        cart: ['Your Shopping Cart', 'Your cart is currently empty. Product and checkout features will be added in the next development steps.'],
-        profile: ['Your Account', 'Sign in and account management will be added when we build customer authentication.']
-    };
-    function openPanel(key) {
-        const content = panelCopy[key];
-        panelTitle.textContent = content[0];
-        panelMessage.textContent = content[1];
-        overlay.classList.add('open');
-    }
-    document.querySelectorAll('[data-panel]').forEach(button => {
-        button.addEventListener('click', () => openPanel(button.dataset.panel));
-    });
-    document.querySelector('.close-sheet').addEventListener('click', () => overlay.classList.remove('open'));
-    panelAction.addEventListener('click', () => overlay.classList.remove('open'));
-    overlay.addEventListener('click', event => {
-        if (event.target === overlay) overlay.classList.remove('open');
-    });
-    const searchInput = document.getElementById('product-search');
-    const productCards = [...document.querySelectorAll('.product')];
-    const categoryButtons = [...document.querySelectorAll('[data-category]')];
-    let selectedCategory = 'all';
-    function filterProducts() {
-        const term = searchInput.value.trim().toLowerCase();
-        let visible = 0;
-        productCards.forEach(card => {
-            const matchesCategory = selectedCategory === 'all' || card.dataset.category === selectedCategory;
-            const matchesSearch = card.textContent.toLowerCase().includes(term);
-            const show = matchesCategory && matchesSearch;
-            card.hidden = !show;
-            if (show) visible++;
-        });
-        document.getElementById('empty-state').classList.toggle('show', visible === 0);
-    }
-    searchInput.addEventListener('input', filterProducts);
-    categoryButtons.forEach(button => button.addEventListener('click', () => {
-        selectedCategory = button.dataset.category;
-        categoryButtons.forEach(item => item.classList.toggle('active', item === button));
-        filterProducts();
-        document.getElementById('featured').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }));
-    document.querySelectorAll('[data-action]').forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            button.classList.add('active');
-            const action = button.dataset.action;
-            if (action === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
-            if (action === 'categories') document.getElementById('categories').scrollIntoView({ behavior: 'smooth' });
-            if (action === 'cart' || action === 'profile') openPanel(action);
-        });
-    });
+const products=[...document.querySelectorAll('.product')];
+const overlay=document.getElementById('panel'),title=document.getElementById('panel-title'),content=document.getElementById('panel-content');
+let cart=JSON.parse(localStorage.getItem('nt-cart')||'{}');
+let wishlist=JSON.parse(localStorage.getItem('nt-wishlist')||'[]');
+const info=card=>({id:card.dataset.id,name:card.dataset.name,price:Number(card.dataset.price),emoji:card.dataset.emoji});
+const money=n=>'৳'+n.toLocaleString('en-BD');
+function save(){localStorage.setItem('nt-cart',JSON.stringify(cart));localStorage.setItem('nt-wishlist',JSON.stringify(wishlist));updateCounts()}
+function updateCounts(){let count=Object.values(cart).reduce((a,b)=>a+b,0);document.getElementById('cart-count').textContent=count?count:'';document.getElementById('wish-count').textContent=wishlist.length;products.forEach(c=>{let b=c.querySelector('.heart-btn');let yes=wishlist.includes(c.dataset.id);b.classList.toggle('saved',yes);b.textContent=yes?'♥':'♡'})}
+function showPanel(heading,html){title.textContent=heading;content.innerHTML=html;overlay.classList.add('open')}
+function closePanel(){overlay.classList.remove('open')}
+function detail(card){let p=info(card);showPanel(p.name,'<div class="detail-visual">'+p.emoji+'</div><p class="detail-price">'+money(p.price)+'</p><p class="detail-copy">A selected technology product from Next Tech. Product specifications and live stock details will be connected through the admin CMS in a later step.</p><button class="sheet-action" id="detail-add">Add to Cart</button>');document.getElementById('detail-add').onclick=()=>{addCart(p.id);closePanel()}}
+function addCart(id){cart[id]=(cart[id]||0)+1;save();showToast('Added to your cart')}
+function showToast(message){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#172033;color:white;padding:12px 18px;border-radius:30px;z-index:80;font-size:13px';document.body.appendChild(t)}t.textContent=message;t.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display='none',1700)}
+products.forEach(card=>{card.querySelector('.details-btn').onclick=()=>detail(card);card.querySelector('.add-btn').onclick=()=>addCart(card.dataset.id);card.querySelector('.heart-btn').onclick=()=>{let id=card.dataset.id;wishlist=wishlist.includes(id)?wishlist.filter(x=>x!==id):[...wishlist,id];save();showToast(wishlist.includes(id)?'Saved to wishlist':'Removed from wishlist')}});
+function openCart(){let rows=Object.entries(cart).filter(([,q])=>q>0);if(!rows.length){showPanel('Your Cart','<p>Your cart is empty. Explore products and add your favourites.</p>');return}let total=0;let html=rows.map(([id,q])=>{let c=products.find(x=>x.dataset.id===id);if(!c)return '';let p=info(c);total+=p.price*q;return '<div class="cart-row"><div class="mini-image">'+p.emoji+'</div><div class="row-info"><strong>'+p.name+'</strong><small>'+money(p.price)+'</small></div><div class="qty"><button data-minus="'+id+'">−</button><b>'+q+'</b><button data-plus="'+id+'">+</button></div></div>'}).join('')+'<div class="total"><span>Total</span><span>'+money(total)+'</span></div><p style="margin-top:10px">Checkout will be connected after the backend and order system are ready.</p>';showPanel('Your Shopping Cart',html);content.querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>{let id=b.dataset.minus;cart[id]--;if(cart[id]<=0)delete cart[id];save();openCart()});content.querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>{cart[b.dataset.plus]++;save();openCart()})}
+function openWishlist(){let saved=wishlist.map(id=>products.find(c=>c.dataset.id===id)).filter(Boolean);if(!saved.length){showPanel('Your Wishlist','<p>No saved products yet. Tap the heart on a product to save it here.</p>');return}showPanel('Your Wishlist',saved.map(c=>{let p=info(c);return '<div class="wish-row"><div class="mini-image">'+p.emoji+'</div><div class="row-info"><strong>'+p.name+'</strong><small>'+money(p.price)+'</small></div><button class="small-btn primary" data-wish-add="'+p.id+'">Add</button></div>'}).join(''));content.querySelectorAll('[data-wish-add]').forEach(b=>b.onclick=()=>{addCart(b.dataset.wishAdd);closePanel()})}
+document.getElementById('wishlist-open').onclick=openWishlist;
+document.getElementById('menu-open').onclick=()=>showPanel('Quick Menu','<p>Explore categories, discover featured products, or use search to find an item.</p>');
+document.querySelector('.close-sheet').onclick=closePanel;document.getElementById('panel-action').onclick=closePanel;overlay.onclick=e=>{if(e.target===overlay)closePanel()};
+document.getElementById('product-search').addEventListener('input',filter);
+let chosen='all';function filter(){let term=document.getElementById('product-search').value.toLowerCase().trim(),visible=0;products.forEach(c=>{let ok=(chosen==='all'||c.dataset.category===chosen)&&c.textContent.toLowerCase().includes(term);c.hidden=!ok;if(ok)visible++});document.getElementById('empty-state').classList.toggle('show',visible===0)}
+document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{chosen=b.dataset.category;document.querySelectorAll('[data-category]').forEach(x=>x.classList.toggle('active',x===b));filter()});
+document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x===b));let a=b.dataset.action;if(a==='home')window.scrollTo({top:0,behavior:'smooth'});if(a==='categories')document.getElementById('categories').scrollIntoView({behavior:'smooth'});if(a==='cart')openCart();if(a==='profile')showPanel('Your Account','<p>Customer sign-in and account management will be built in the authentication step.</p>')});
+updateCounts();
 </script>
-</body>
-</html>
+</body></html>
 BLADE
-
-echo "Next Tech luxury header and interactive navigation installed."
+echo "Next Tech product details, wishlist and cart demo installed."
 echo "Run: cd laravel-app && php artisan serve --host=0.0.0.0 --port=8000"
