@@ -12,7 +12,7 @@ mkdir -p "$APP/resources/views/layouts" "$APP/resources/views/pages" "$APP/route
 cat > "$APP/routes/web.php" <<'PHP'
 <?php
 
-use Illuminate\\Support\\Facades\\Route;
+use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'pages.home')->name('home');
 Route::view('/categories', 'pages.categories')->name('categories');
