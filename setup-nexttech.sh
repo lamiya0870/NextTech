@@ -119,7 +119,7 @@ cat > "$APP/resources/views/pages/checkout.blade.php" <<'BLADE'
 @endsection
 @push('scripts')
 <script>
-const summary=document.getElementById('checkout-summary');function drawSummary(){let rows=Object.entries(cart).filter(([,q])=>q>0);summary.innerHTML='<b>Order Summary</b><p class="muted">'+(rows.length?rows.map(([id,q])=>(names[id]?.[0]||id)+' × '+q).join('<br>'):'Your cart is empty')+'</p>'}drawSummary();
+const summary=document.getElementById('checkout-summary');const names={'router-dual-band':['Dual Band Wi-Fi Router'],'gpon-onu':['GPON ONU 1GE'],'mini-ups-12v':['12V Mini DC UPS'],'fiber-drop-cable':['Fiber Optic Drop Cable'],'patch-cord':['SC-SC Fiber Patch Cord'],'fast-connector':['SC Fast Connector'],'poe-adapter':['PoE Power Adapter'],'mikrotik-router':['MikroTik Router']};function drawSummary(){let rows=Object.entries(cart).filter(([,q])=>q>0);summary.innerHTML='<b>Order Summary</b><p class="muted">'+(rows.length?rows.map(([id,q])=>(names[id]?.[0]||id)+' × '+q).join('<br>'):'Your cart is empty')+'</p>'}drawSummary();
 document.getElementById('checkout-form').addEventListener('submit',e=>{e.preventDefault();if(!Object.keys(cart).length){alert('Your cart is empty.');return}let data=Object.fromEntries(new FormData(e.target));let order={...data,items:cart,createdAt:new Date().toISOString()};let orders=read('nt-order-requests',[]);orders.push(order);localStorage.setItem('nt-order-requests',JSON.stringify(orders));document.getElementById('checkout-result').innerHTML='<div class="panel"><h2>Order request saved on this device</h2><p class="muted">This is a front-end demo only. No order has been sent to the store yet.</p></div>';cart={};persist();e.target.reset();drawSummary()});
 </script>
 @endpush
