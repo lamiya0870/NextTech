@@ -12,10 +12,10 @@ mkdir -p "$APP/app/Models" "$APP/database/migrations" "$APP/database/seeders"
 cat > "$APP/app/Models/Product.php" <<'PHP'
 <?php
 
-namespace App\\Models;
+namespace App\Models;
 
-use Illuminate\\Database\\Eloquent\\Model;
-use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
@@ -48,9 +48,9 @@ PHP
 cat > "$APP/database/migrations/2026_11_16_000000_create_products_table.php" <<'PHP'
 <?php
 
-use Illuminate\\Database\\Migrations\\Migration;
-use Illuminate\\Database\\Schema\\Blueprint;
-use Illuminate\\Support\\Facades\\Schema;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -84,10 +84,10 @@ PHP
 cat > "$APP/database/seeders/ProductSeeder.php" <<'PHP'
 <?php
 
-namespace Database\\Seeders;
+namespace Database\Seeders;
 
-use App\\Models\\Product;
-use Illuminate\\Database\\Seeder;
+use App\Models\Product;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -114,9 +114,9 @@ PHP
 cat > "$APP/database/seeders/DatabaseSeeder.php" <<'PHP'
 <?php
 
-namespace Database\\Seeders;
+namespace Database\Seeders;
 
-use Illuminate\\Database\\Seeder;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
