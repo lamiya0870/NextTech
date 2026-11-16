@@ -12,7 +12,7 @@ class AdminAuthController extends Controller
     public function showLogin()
     {
         if (auth()->check() && auth()->user()->is_admin) {
-            return redirect()->route('admin.dashboard');
+            return redirect('/admin');
         }
 
         return view('admin.login');
@@ -43,7 +43,7 @@ class AdminAuthController extends Controller
             ]);
         }
 
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect('/admin');
     }
 
     public function logout(Request $request)
@@ -52,6 +52,6 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login');
+        return redirect('/admin/login');
     }
 }
